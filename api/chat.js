@@ -1,18 +1,37 @@
-export default async function handler(req, res) {
+async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    addMessage("user", message);
+    input.value = "";
+
     try {
-        const response = await fetch("https://chatbot-deploy-g0i7.onrender.com/chat", {
+        const res = await fetch("https://chatbot-deploy-goi7.onrender.com/chat", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(req.body)
+            body: JSON.stringify({ message })
         });
 
-        const data = await response.json();
+        const data = await res.json();
 
-        res.status(200).json(data);
+        addMessage("bot", data.response);
 
     } catch (error) {
-        res.status(500).json({ response: "Server error: " + error.message });
+        addMessage("bot", "Error: " + error.message);
     }
+}
+
+function addMessage(sender, text) {
+    const chat = document.getElementById("chatBox");
+
+    const msg = document.createElement("div");
+    msg.className = sender === "user" ? "user-msg" : "bot-msg";
+    msg.innerText = text;
+
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
 }
