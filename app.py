@@ -4,14 +4,17 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
-CORS(app)
 
+# ✅ FIX CORS (important)
+CORS(app, resources={r"/*": {"origins": "*"}})
+
+# 🔐 API KEY from Render env
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# ✅ Correct modern model
+# ✅ WORKING MODEL
 model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-print("🔥 USING GEMINI 1.5 FLASH (FIXED)")
+print("🔥 BACKEND RUNNING WITH GEMINI")
 
 @app.route("/")
 def home():
