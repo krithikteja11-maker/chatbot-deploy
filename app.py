@@ -4,46 +4,34 @@ import google.generativeai as genai
 import os
 
 app = Flask(__name__)
+CORS(app)
 
-# ✅ Allow all origins (fixes CORS)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-# 🔐 Load API key from environment variable
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# ✅ Correct working model
-model = genai.GenerativeModel("gemini-1.5-flash")
+# ✅ Correct modern model
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
-# 🔥 Debug line to confirm deployment
-print("🔥 NEW CODE DEPLOYED — GEMINI 1.5 FLASH")
+print("🔥 USING GEMINI 1.5 FLASH (FIXED)")
 
 @app.route("/")
 def home():
     return "API is running"
 
-@app.route("/chat", methods=["POST", "OPTIONS"])
+@app.route("/chat", methods=["POST"])
 def chat():
-    # Handle preflight request (CORS)
-    if request.method == "OPTIONS":
-        return jsonify({}), 200
-
     try:
-        data = request.get_json()
-        user_input = data.get("message", "")
+        user_input = request.json.get("message", "")
 
-        if not user_input:
-            return jsonify({"response": "Please enter a message."})
-
-        # 🤖 Get AI response
         response = model.generate_content(user_input)
 
-        # Some responses may not have .text (safety)
-        reply = response.text if hasattr(response, "text") else "No response from AI."
-
-        return jsonify({"response": reply})
+        return jsonify({
+            "response": response.text
+        })
 
     except Exception as e:
-        return jsonify({"response": "Error: " + str(e)})
+        return jsonify({
+            "response": "Error: " + str(e)
+        })
 
 if __name__ == "__main__":
     app.run()
