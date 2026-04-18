@@ -1,74 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>AI Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            background: #1e1e2f;
+            background: #0f172a;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            color: white;
         }
 
-        .container {
-            width: 400px;
+        .chat-container {
+            width: 350px;
             height: 550px;
-            background: #2c2c3e;
+            background: #1e293b;
             border-radius: 15px;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         .header {
+            background: #22c55e;
+            color: white;
             padding: 15px;
-            background: #4CAF50;
-            border-radius: 15px 15px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            font-weight: bold;
+            text-align: center;
         }
 
         .chat-box {
             flex: 1;
             padding: 10px;
             overflow-y: auto;
-            display: flex;
-            flex-direction: column;
         }
 
         .message {
-            max-width: 70%;
+            margin: 8px 0;
             padding: 10px;
-            margin: 5px;
             border-radius: 10px;
+            max-width: 80%;
         }
 
         .user {
-            background: #4CAF50;
+            background: #22c55e;
             align-self: flex-end;
+            color: white;
         }
 
         .bot {
-            background: #444;
-            align-self: flex-start;
-        }
-
-        .typing {
-            font-size: 12px;
-            color: #aaa;
-            margin-left: 5px;
+            background: #334155;
+            color: white;
         }
 
         .input-area {
             display: flex;
             padding: 10px;
-            border-top: 1px solid #555;
+            background: #0f172a;
         }
 
         input {
@@ -80,127 +74,76 @@
         }
 
         button {
-            margin-left: 8px;
-            padding: 10px;
+            margin-left: 10px;
+            padding: 10px 15px;
             border: none;
             border-radius: 8px;
-            background: #4CAF50;
+            background: #22c55e;
             color: white;
             cursor: pointer;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        .controls {
-            display: flex;
-            gap: 5px;
-        }
-
-        .light-mode {
-            background: #f4f4f4;
-            color: black;
-        }
-
-        .light-mode .container {
-            background: white;
-        }
-
-        .light-mode .bot {
-            background: #ddd;
-        }
-
-        .light-mode input {
-            border: 1px solid #ccc;
         }
     </style>
 </head>
 
 <body>
 
-<div class="container">
-    <div class="header">
-        <span>🤖 AI Chatbot</span>
-        <div class="controls">
-            <button onclick="toggleMode()">🌙</button>
-            <button onclick="clearChat()">🗑</button>
-        </div>
-    </div>
+<div class="chat-container">
+    <div class="header">🤖 AI Chatbot</div>
 
-    <div class="chat-box" id="chat-box"></div>
+    <div id="chat-box" class="chat-box"></div>
 
     <div class="input-area">
-        <input id="msg" placeholder="Type a message..." />
-        <button onclick="send()">Send</button>
+        <input id="input" type="text" placeholder="Type a message..." />
+        <button onclick="sendMessage()">Send</button>
     </div>
 </div>
 
 <script>
-async function send() {
-    let input = document.getElementById("msg");
-    let message = input.value;
+    console.log("NEW VERSION LOADED ✅");
 
-    if (!message) return;
-
-    let chatBox = document.getElementById("chat-box");
-
-    // user message
-    let userMsg = document.createElement("div");
-    userMsg.className = "message user";
-    userMsg.innerText = message;
-    chatBox.appendChild(userMsg);
-
-    input.value = "";
-
-    // typing indicator
-    let typing = document.createElement("div");
-    typing.className = "typing";
-    typing.innerText = "Bot is typing...";
-    chatBox.appendChild(typing);
-
-    chatBox.scrollTop = chatBox.scrollHeight;
-
-    try {
-        let res = await fetch("/api/chat", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({message: message})
-        });
-
-        let data = await res.json();
-
-        chatBox.removeChild(typing);
-
-        let botMsg = document.createElement("div");
-        botMsg.className = "message bot";
-        botMsg.innerText = data.response;
-        chatBox.appendChild(botMsg);
-
+    function addMessage(text, className) {
+        const chatBox = document.getElementById("chat-box");
+        const msg = document.createElement("div");
+        msg.className = "message " + className;
+        msg.innerText = text;
+        chatBox.appendChild(msg);
         chatBox.scrollTop = chatBox.scrollHeight;
-
-    } catch (error) {
-        console.log("ERROR:", error);
-        typing.innerText = "Error: " + error;
     }
-}
 
-// Enter key support
-document.getElementById("msg").addEventListener("keypress", function(e) {
-    if (e.key === "Enter") {
-        send();
+    async function sendMessage() {
+        const input = document.getElementById("input");
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        addMessage(message, "user");
+        input.value = "";
+
+        try {
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            addMessage(data.response, "bot");
+
+        } catch (error) {
+            console.error(error);
+            addMessage("⚠️ Error connecting to server", "bot");
+        }
     }
-});
 
-// clear chat
-function clearChat() {
-    document.getElementById("chat-box").innerHTML = "";
-}
-
-// dark mode toggle
-function toggleMode() {
-    document.body.classList.toggle("light-mode");
-}
+    // Enter key support
+    document.getElementById("input").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
 </script>
 
 </body>
