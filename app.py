@@ -5,31 +5,45 @@ import os
 
 app = Flask(__name__)
 
-# ✅ Allow your Vercel site ONLY
-CORS(app, origins=["*"])   # keep * for now (simple fix)
+# ✅ Allow all origins (fixes CORS)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
+# 🔐 Load API key from environment variable
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+
+# ✅ Correct working model
 model = genai.GenerativeModel("gemini-1.5-flash")
+
+# 🔥 Debug line to confirm deployment
+print("🔥 NEW CODE DEPLOYED — GEMINI 1.5 FLASH")
 
 @app.route("/")
 def home():
     return "API is running"
 
-@app.route("/chat", methods=["POST", "OPTIONS"])  # 👈 ADD OPTIONS
+@app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
+    # Handle preflight request (CORS)
     if request.method == "OPTIONS":
         return jsonify({}), 200
 
-    data = request.get_json()
-    user_input = data.get("message", "")
-
     try:
-        response = model.generate_content(user_input)
-        reply = response.text
-    except Exception as e:
-        reply = "Error: " + str(e)
+        data = request.get_json()
+        user_input = data.get("message", "")
 
-    return jsonify({"response": reply})
+        if not user_input:
+            return jsonify({"response": "Please enter a message."})
+
+        # 🤖 Get AI response
+        response = model.generate_content(user_input)
+
+        # Some responses may not have .text (safety)
+        reply = response.text if hasattr(response, "text") else "No response from AI."
+
+        return jsonify({"response": reply})
+
+    except Exception as e:
+        return jsonify({"response": "Error: " + str(e)})
 
 if __name__ == "__main__":
     app.run()
