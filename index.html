@@ -7,16 +7,16 @@
         body {
             font-family: Arial, sans-serif;
             background: #1e1e2f;
-            color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
+            color: white;
         }
 
         .container {
-            width: 420px;
+            width: 400px;
             height: 550px;
             background: #2c2c3e;
             border-radius: 15px;
@@ -32,11 +32,6 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-
-        .header h2 {
-            margin: 0;
-            font-size: 18px;
         }
 
         .chat-box {
@@ -64,6 +59,12 @@
             align-self: flex-start;
         }
 
+        .typing {
+            font-size: 12px;
+            color: #aaa;
+            margin-left: 5px;
+        }
+
         .input-area {
             display: flex;
             padding: 10px;
@@ -80,7 +81,7 @@
 
         button {
             margin-left: 8px;
-            padding: 10px 12px;
+            padding: 10px;
             border: none;
             border-radius: 8px;
             background: #4CAF50;
@@ -95,12 +96,6 @@
         .controls {
             display: flex;
             gap: 5px;
-        }
-
-        .typing {
-            font-size: 12px;
-            color: #aaa;
-            margin-left: 5px;
         }
 
         .light-mode {
@@ -126,7 +121,7 @@
 
 <div class="container">
     <div class="header">
-        <h2>🤖 AI Chatbot</h2>
+        <span>🤖 AI Chatbot</span>
         <div class="controls">
             <button onclick="toggleMode()">🌙</button>
             <button onclick="clearChat()">🗑</button>
@@ -142,7 +137,6 @@
 </div>
 
 <script>
-
 async function send() {
     let input = document.getElementById("msg");
     let message = input.value;
@@ -151,7 +145,7 @@ async function send() {
 
     let chatBox = document.getElementById("chat-box");
 
-    // User message
+    // user message
     let userMsg = document.createElement("div");
     userMsg.className = "message user";
     userMsg.innerText = message;
@@ -159,7 +153,7 @@ async function send() {
 
     input.value = "";
 
-    // Typing indicator
+    // typing indicator
     let typing = document.createElement("div");
     typing.className = "typing";
     typing.innerText = "Bot is typing...";
@@ -168,7 +162,7 @@ async function send() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        let res = await fetch("https://chatbot-api.onrender.com/chat", {
+        let res = await fetch("https://chatbot-deploy-xxxx.onrender.com/chat", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({message: message})
@@ -186,7 +180,8 @@ async function send() {
         chatBox.scrollTop = chatBox.scrollHeight;
 
     } catch (error) {
-        typing.innerText = "Error connecting to server";
+        console.log("ERROR:", error);
+        typing.innerText = "Error: " + error;
     }
 }
 
@@ -197,16 +192,15 @@ document.getElementById("msg").addEventListener("keypress", function(e) {
     }
 });
 
-// Clear chat
+// clear chat
 function clearChat() {
     document.getElementById("chat-box").innerHTML = "";
 }
 
-// Dark/Light mode
+// dark mode toggle
 function toggleMode() {
     document.body.classList.toggle("light-mode");
 }
-
 </script>
 
 </body>
