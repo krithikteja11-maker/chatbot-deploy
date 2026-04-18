@@ -9,8 +9,7 @@ app = Flask(__name__)
 CORS(app, origins=["*"])   # keep * for now (simple fix)
 
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
-
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 @app.route("/")
 def home():
