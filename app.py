@@ -2,15 +2,20 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+
+# ✅ FORCE CORS PROPERLY
+CORS(app, origins=["*"])
 
 @app.route("/")
 def home():
     return "API is running"
 
-@app.route("/chat", methods=["POST"])
+@app.route("/chat", methods=["POST", "OPTIONS"])
 def chat():
-    user_input = request.json["message"]
+    if request.method == "OPTIONS":
+        return '', 200
+
+    user_input = request.json.get("message", "")
     response = "You said: " + user_input
     return jsonify({"response": response})
 
