@@ -13,7 +13,7 @@ async function sendMessage() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ message })
+            body: JSON.stringify({ message: message })
         });
 
         const data = await res.json();
@@ -26,12 +26,13 @@ async function sendMessage() {
 }
 
 function addMessage(sender, text) {
-    const chat = document.getElementById("chatBox");
+    const chatBox = document.getElementById("chatBox");
 
     const msg = document.createElement("div");
-    msg.className = sender === "user" ? "user-msg" : "bot-msg";
+    msg.className = sender;
+
     msg.innerText = text;
 
-    chat.appendChild(msg);
-    chat.scrollTop = chat.scrollHeight;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
 }
