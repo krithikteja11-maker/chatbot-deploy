@@ -162,7 +162,7 @@ async function send() {
     chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        let res = await fetch("https://chatbot-deploy-xxxx.onrender.com/chat", {
+        let res = await fetch("/api/chat", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({message: message})
